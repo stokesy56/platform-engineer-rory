@@ -1,24 +1,25 @@
 # Platform Engineer Technical Test
 
-Welcome to Castor Platform Engineer technical test. 
-This test is designed to assess your technical skills and knowledge with containerization.
+## Building and Running the Image Locally
 
-## Assignment
+### Build the Image with Default Port (8080):
+  `docker build -t my-go-app .`
 
-Your task is to build a container image that runs the Go web application in this repository.
+### Run the Container with Default Port:
+  `docker run -p 8080:8080 my-go-app`
 
-As part of this task you will need to:
+### Build the Image with Custom Port:
+  `docker build --build-arg PORT=<your-port> -t my-go-app .`
 
-- Build a container image that runs the Go web application.
-  - Allow the environment variable `PORT` to be configurable, but with a default value.
-  - No constraints on the base image or the container runtime.
-- Provide instructions on how to build and run the container image in a README file.
-- Create a CI pipeline that builds the container image and pushes it to a registry.
-  - The container must be able to run on Linux x86_64 and ARM processors both.
-  - You can use any CI tool you like, but the pipeline needs to be defined in code.
+### Run the Container with Custom Port:
+  `docker run -p <your-port>:<your-port> my-go-app`
 
-## Submission
+   
 
-1. Fork this repository.
-1. Complete the task and commit it to your fork.
-1. Send us a link to your fork. If you would like to keep it private, please add `@MattiasAng` and `@zoni` as collaborators.
+## Understanding the GitLab CI Pipeline
+
+### Overview:
+  The pipeline automates building and pushing a Docker image compatible with amd64 and arm64 architectures to the GitLab registry.
+
+### Changing the Port Number in a Manual Pipeline Run:
+  When triggering a pipeline manually in GitLab, you can override the PORT variable by specifying a different port value in the 'CI/CD' > 'Run pipeline' interface under 'Variables'.

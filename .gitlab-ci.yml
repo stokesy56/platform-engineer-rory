@@ -1,0 +1,38 @@
+stages:
+  - build
+
+variables:
+  IMAGE_TAG: "25.0.3"
+  PORT: "8080"
+
+
+# This job builds the Docker image and pushes it to Gitlab registry
+build-and-push-image:
+  stage: build
+  # Use Docker 19.03.12 as the base image for this job (required 19.03 or later for buildx)
+  image: docker:$IMAGE_TAG
+  # Use Docker-in-Docker service to enable Docker commands within this job as using global runners
+  services:
+    - docker:$IMAGE_TAG-dind
+  # Use before_script to seperate config steps of script
+  before_script:
+    # Log into the Docker registry using GitLab CI's predefined variables
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # Run QEMU to enable multi-architecture build support
+    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    # Create a new buildx builder instance and set it as the default
+    - docker buildx create --use
+
+  # The main script of this job to build and push images
+  script:
+    # Use Docker Buildx to build and push multiarch Docker images
+    - |
+      docker buildx build \
+        # Set a build argument for the PORT environment variable with a default value of 8080
+        --build-arg PORT=$PORT \
+        # Specify the platforms for which to build the image (both amd64 and arm64 architectures)
+        --platform linux/amd64,linux/arm64 \
+        # Tag the built image with the GitLab registry path and the commit reference
+        --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG \
+        # Push the built image to the specified registry
+        --push .
